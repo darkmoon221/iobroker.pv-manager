@@ -71,8 +71,8 @@
         ]
     },
     "native": {
-        "option1": true,
-        "option2": "42"
+        "option1": "",
+        "option2": 0
     },
     "objects": [],
     "instanceObjects": [

@@ -5,11 +5,15 @@
 // The adapter-core module gives you access to the core ioBroker functions
 // you need to create an adapter
 import * as utils from '@iobroker/adapter-core';
+import { threadId } from 'worker_threads';
+import { MetricsCalculator } from './lib/metricsCalculator';
 
 // Load your modules here, e.g.:
 // import * as fs from "fs";
 
-class PvManager extends utils.Adapter {
+export class PvManager extends utils.Adapter {
+
+    private metricsCalculator: MetricsCalculator | undefined;
 
     public constructor(options: Partial<utils.AdapterOptions> = {}) {
         super({
@@ -37,6 +41,8 @@ class PvManager extends utils.Adapter {
         this.log.info('config option1: ' + this.config.option1);
         this.log.info('config option2: ' + this.config.option2);
 
+        this.metricsCalculator = new MetricsCalculator(this);
+
         /*
         For every state in the system there has to be also an object of type state
         Here a simple template for a boolean variable named "testVariable"
@@ -56,6 +62,9 @@ class PvManager extends utils.Adapter {
 
         // In order to get state updates, you need to subscribe to them. The following line adds a subscription for our variable we have created above.
         this.subscribeStates('testVariable');
+
+        this.log.info('Subscribe to state: ' + this.config.option1);
+        this.subscribeForeignStates(this.config.option1);
         // You can also add a subscription for multiple states. The following line watches all states starting with "lights."
         // this.subscribeStates('lights.*');
         // Or, if you really must, you can also watch all states. Don't do this if you don't need to. Otherwise this will cause a lot of unnecessary load on the system:
@@ -81,6 +90,9 @@ class PvManager extends utils.Adapter {
 
         result = await this.checkGroupAsync('admin', 'admin');
         this.log.info('check group user admin group admin: ' + result);
+
+        this.setState('info.connection', true, true);
+
     }
 
     /**
@@ -119,6 +131,11 @@ class PvManager extends utils.Adapter {
      * Is called if a subscribed state changes
      */
     private onStateChange(id: string, state: ioBroker.State | null | undefined): void {
+
+        if(id === this.config.option1) {
+            this.metricsCalculator?.updateWechselRichterTotal(state?.val?.toString());
+        }
+
         if (state) {
             // The state was changed
             this.log.info(`state ${id} changed: ${state.val} (ack = ${state.ack})`);

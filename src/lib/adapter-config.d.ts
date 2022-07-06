@@ -4,8 +4,8 @@
 declare global {
     namespace ioBroker {
         interface AdapterConfig {
-            option1: boolean;
-            option2: string;
+            option1: string;
+            option2: number;
         }
     }
 }
