@@ -1,0 +1,101 @@
+{
+    "common": {
+        "name": "pv-manager",
+        "version": "0.0.1",
+        "news": {
+            "0.0.1": {
+                "en": "initial release",
+                "de": "Erstveröffentlichung",
+                "ru": "Начальная версия",
+                "pt": "lançamento inicial",
+                "nl": "Eerste uitgave",
+                "fr": "Première version",
+                "it": "Versione iniziale",
+                "es": "Versión inicial",
+                "pl": "Pierwsze wydanie",
+                "zh-cn": "首次出版"
+            }
+        },
+        "title": "PV Manager",
+        "titleLang": {
+            "en": "PV Manager",
+            "de": "PV-Manager",
+            "ru": "PV-менеджер",
+            "pt": "Gerente fotovoltaico",
+            "nl": "PV-manager",
+            "fr": "Gestionnaire PV",
+            "it": "Gestore fotovoltaico",
+            "es": "Gerente de fotovoltaica",
+            "pl": "Menedżer fotowoltaiki",
+            "zh-cn": "光伏管理器"
+        },
+        "desc": {
+            "en": "pv-manager",
+            "de": "PV-Manager",
+            "ru": "pv-менеджер",
+            "pt": "pv-manager",
+            "nl": "pv-manager",
+            "fr": "pv-manager",
+            "it": "pv-manager",
+            "es": "pv-gerente",
+            "pl": "menedżer ds. pv",
+            "zh-cn": "光伏管理器"
+        },
+        "authors": [
+            "Tobias Kronschnabl <x.kronschnabl@gmail.com>"
+        ],
+        "keywords": [
+            "ioBroker",
+            "template",
+            "Smart Home",
+            "home automation"
+        ],
+        "license": "MIT",
+        "platform": "Javascript/Node.js",
+        "main": "build/main.js",
+        "icon": "pv-manager.png",
+        "enabled": true,
+        "extIcon": "https://raw.githubusercontent.com/darkmoon221/ioBroker.pv-manager/main/admin/pv-manager.png",
+        "readme": "https://github.com/darkmoon221/ioBroker.pv-manager/blob/main/README.md",
+        "loglevel": "info",
+        "mode": "daemon",
+        "type": "energy",
+        "compact": true,
+        "connectionType": "local",
+        "dataSource": "push",
+        "materialize": true,
+        "dependencies": [
+            {
+                "js-controller": ">=2.0.0"
+            }
+        ]
+    },
+    "native": {
+        "option1": true,
+        "option2": "42"
+    },
+    "objects": [],
+    "instanceObjects": [
+        {
+            "_id": "info",
+            "type": "channel",
+            "common": {
+                "name": "Information"
+            },
+            "native": {}
+        },
+        {
+            "_id": "info.connection",
+            "type": "state",
+            "common": {
+                "role": "indicator.connected",
+                "name": "Device or service connected",
+                "type": "boolean",
+                "read": true,
+                "write": false,
+                "def": false
+            },
+            "native": {}
+        }
+    ]
+}
