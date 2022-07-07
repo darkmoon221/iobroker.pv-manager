@@ -6,6 +6,8 @@ declare global {
         interface AdapterConfig {
             option1: string;
             option2: number;
+            energyMeterDatapoint: string;
+            wechselrichterCurrentDataPoint: string;
         }
     }
 }
