@@ -5,6 +5,10 @@ var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __getOwnPropNames = Object.getOwnPropertyNames;
 var __getProtoOf = Object.getPrototypeOf;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
 var __copyProps = (to, from, except, desc) => {
   if (from && typeof from === "object" || typeof from === "function") {
     for (let key of __getOwnPropNames(from))
@@ -14,7 +18,14 @@ var __copyProps = (to, from, except, desc) => {
   return to;
 };
 var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target, mod));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var main_exports = {};
+__export(main_exports, {
+  PvManager: () => PvManager
+});
+module.exports = __toCommonJS(main_exports);
 var utils = __toESM(require("@iobroker/adapter-core"));
+var import_metricsCalculator = require("./lib/metricsCalculator");
 class PvManager extends utils.Adapter {
   constructor(options = {}) {
     super({
@@ -29,25 +40,13 @@ class PvManager extends utils.Adapter {
     this.setState("info.connection", false, true);
     this.log.info("config option1: " + this.config.option1);
     this.log.info("config option2: " + this.config.option2);
-    await this.setObjectNotExistsAsync("testVariable", {
-      type: "state",
-      common: {
-        name: "testVariable",
-        type: "boolean",
-        role: "indicator",
-        read: true,
-        write: true
-      },
-      native: {}
-    });
-    this.subscribeStates("testVariable");
-    await this.setStateAsync("testVariable", true);
-    await this.setStateAsync("testVariable", { val: true, ack: true });
-    await this.setStateAsync("testVariable", { val: true, ack: true, expire: 30 });
-    let result = await this.checkPasswordAsync("admin", "iobroker");
-    this.log.info("check user admin pw iobroker: " + result);
-    result = await this.checkGroupAsync("admin", "admin");
-    this.log.info("check group user admin group admin: " + result);
+    this.log.info("Energy meter datapoint: " + this.config.energyMeterDatapoint);
+    this.metricsCalculator = new import_metricsCalculator.MetricsCalculator(this);
+    await this.metricsCalculator.intitializeStates();
+    this.subscribeForeignStates(this.config.option1);
+    this.subscribeForeignStates(this.config.energyMeterDatapoint);
+    this.subscribeForeignStates(this.config.wechselrichterCurrentDataPoint);
+    this.setState("info.connection", true, true);
   }
   onUnload(callback) {
     try {
@@ -57,10 +56,15 @@ class PvManager extends utils.Adapter {
     }
   }
   onStateChange(id, state) {
-    if (state) {
-      this.log.info(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
-    } else {
-      this.log.info(`state ${id} deleted`);
+    var _a, _b, _c, _d, _e, _f;
+    if (id === this.config.option1) {
+      (_b = this.metricsCalculator) == null ? void 0 : _b.updateWechselrichterTotal((_a = state == null ? void 0 : state.val) == null ? void 0 : _a.toString());
+    }
+    if (id === this.config.energyMeterDatapoint) {
+      (_d = this.metricsCalculator) == null ? void 0 : _d.updateEnergyMeterData((_c = state == null ? void 0 : state.val) == null ? void 0 : _c.toString());
+    }
+    if (id === this.config.wechselrichterCurrentDataPoint) {
+      (_f = this.metricsCalculator) == null ? void 0 : _f.updateWechselrichterCurrent((_e = state == null ? void 0 : state.val) == null ? void 0 : _e.toString());
     }
   }
 }
@@ -69,4 +73,8 @@ if (require.main !== module) {
 } else {
   (() => new PvManager())();
 }
+// Annotate the CommonJS export names for ESM import in node:
+0 && (module.exports = {
+  PvManager
+});
 //# sourceMappingURL=main.js.map
