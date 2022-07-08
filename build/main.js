@@ -38,12 +38,13 @@ class PvManager extends utils.Adapter {
   }
   async onReady() {
     this.setState("info.connection", false, true);
-    this.log.info("config option1: " + this.config.option1);
-    this.log.info("config option2: " + this.config.option2);
-    this.log.info("Energy meter datapoint: " + this.config.energyMeterDatapoint);
+    this.log.debug("Wechselrichter total feed data point: " + this.config.wechselrichterTotalDataPoint);
+    this.log.debug("Total consumption of wp energy meter before change: " + this.config.wpEnergyMeterTotalConsumptionBeforeChange);
+    this.log.debug("Energy meter datapoint: " + this.config.energyMeterDatapoint);
+    this.log.debug("Wechselrichter current feed data point: " + this.config.wechselrichterCurrentDataPoint);
     this.metricsCalculator = new import_metricsCalculator.MetricsCalculator(this);
     await this.metricsCalculator.intitializeStates();
-    this.subscribeForeignStates(this.config.option1);
+    this.subscribeForeignStates(this.config.wechselrichterTotalDataPoint);
     this.subscribeForeignStates(this.config.energyMeterDatapoint);
     this.subscribeForeignStates(this.config.wechselrichterCurrentDataPoint);
     this.setState("info.connection", true, true);
@@ -57,7 +58,7 @@ class PvManager extends utils.Adapter {
   }
   onStateChange(id, state) {
     var _a, _b, _c, _d, _e, _f;
-    if (id === this.config.option1) {
+    if (id === this.config.wechselrichterTotalDataPoint) {
       (_b = this.metricsCalculator) == null ? void 0 : _b.updateWechselrichterTotal((_a = state == null ? void 0 : state.val) == null ? void 0 : _a.toString());
     }
     if (id === this.config.energyMeterDatapoint) {

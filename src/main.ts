@@ -38,9 +38,10 @@ export class PvManager extends utils.Adapter {
 
         // The adapters config (in the instance object everything under the attribute "native") is accessible via
         // this.config:
-        this.log.info('config option1: ' + this.config.option1);
-        this.log.info('config option2: ' + this.config.option2);
-        this.log.info('Energy meter datapoint: ' + this.config.energyMeterDatapoint);
+        this.log.debug('Wechselrichter total feed data point: ' + this.config.wechselrichterTotalDataPoint);
+        this.log.debug('Total consumption of wp energy meter before change: ' + this.config.wpEnergyMeterTotalConsumptionBeforeChange);
+        this.log.debug('Energy meter datapoint: ' + this.config.energyMeterDatapoint);
+        this.log.debug('Wechselrichter current feed data point: ' + this.config.wechselrichterCurrentDataPoint);
 
         this.metricsCalculator = new MetricsCalculator(this);
         await this.metricsCalculator.intitializeStates();
@@ -65,7 +66,7 @@ export class PvManager extends utils.Adapter {
         // In order to get state updates, you need to subscribe to them. The following line adds a subscription for our variable we have created above.
         // this.subscribeStates('testVariable');
 
-        this.subscribeForeignStates(this.config.option1);
+        this.subscribeForeignStates(this.config.wechselrichterTotalDataPoint);
         this.subscribeForeignStates(this.config.energyMeterDatapoint);
         this.subscribeForeignStates(this.config.wechselrichterCurrentDataPoint);
         // You can also add a subscription for multiple states. The following line watches all states starting with "lights."
@@ -134,7 +135,7 @@ export class PvManager extends utils.Adapter {
      */
     private onStateChange(id: string, state: ioBroker.State | null | undefined): void {
 
-        if(id === this.config.option1) {
+        if(id === this.config.wechselrichterTotalDataPoint) {
             this.metricsCalculator?.updateWechselrichterTotal(state?.val?.toString());
         }
 

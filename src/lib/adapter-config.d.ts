@@ -4,8 +4,8 @@
 declare global {
     namespace ioBroker {
         interface AdapterConfig {
-            option1: string;
-            option2: number;
+            wechselrichterTotalDataPoint: string;
+            wpEnergyMeterTotalConsumptionBeforeChange: number;
             energyMeterDatapoint: string;
             wechselrichterCurrentDataPoint: string;
         }
