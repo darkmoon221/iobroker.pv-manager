@@ -152,7 +152,7 @@ export class MetricsCalculator {
             } else {
                 if (haushalt < 0) {
                     if (wp < 0) {
-                        einspeisung = wp;
+                        einspeisung = Math.abs(wp);
                         haushaltBezug = wrCurrent - Math.abs(haushalt);
                         wpBezug = Math.abs(haushalt) - Math.abs(wp);
                     } else {
