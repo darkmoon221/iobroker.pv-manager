@@ -1,6 +1,6 @@
 {
   "name": "iobroker.pv-manager",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "pv-manager",
   "author": {
     "name": "Tobias Kronschnabl",
