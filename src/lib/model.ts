@@ -47,6 +47,9 @@ export class Current {
 
     wechselrichterEinspeisung = 'wechselrichterEinspeisung';
 
+    haushaltBezugRaw = 'haushaltBezugRaw';
+    wpBezugRaw = 'wpBezugRaw';
+
     verbrauchHaushalt = 'verbrauchHaushalt';
     verbrauchWp = 'verbrauchWp';
 

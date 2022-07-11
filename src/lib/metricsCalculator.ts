@@ -25,7 +25,8 @@ export class MetricsCalculator {
         if (meterData) {
             this.meterData = meterData;
             this.calculateMetrics();
-            this.calculateLiveConsumption();
+            // this.calculateLiveConsumption();
+            this.calcLive();
         }
     }
 
@@ -121,73 +122,63 @@ export class MetricsCalculator {
         }
     }
 
-    calculateLiveConsumption(): void {
+    calcLive(): void {
         if (this.wechselRichterCurrent) {
             const sensorData = this.getSensorData();
+            const wrCurrent = parseFloat(this.wechselRichterCurrent);
 
-            // this.adapter.log.debug('Update energy meter data: ' + JSON.stringify(sensorData));
+            const haushalt = sensorData.strom.aktleist;
+            const wp = sensorData.heizung.aktleist;
 
-            const wrEinspeisung = parseFloat(this.wechselRichterCurrent);
-            // this.adapter.log.debug('WR Einspeisung: ' + wrEinspeisung);
-            this.setStateWithAck(STATES.current.prefix + STATES.current.wechselrichterEinspeisung, wrEinspeisung);
+            const wechselrichterEinspeisung = wrCurrent < 0 ? 0 : wrCurrent;
+            let einspeisung = 0;
+            let bezug = 0;
 
-            const bezugHaushaltRaw = sensorData.strom.aktleist;
-            const bezugWpRaw = sensorData.heizung.aktleist;
+            const haushaltbezugRaw = haushalt;
+            const wpBezugRaw = wp;
 
-            // this.adapter.log.debug('Haushalt Bezug (raw): ' + bezugHaushaltRaw);
-            // this.adapter.log.debug('WR Bezug (raw): ' + bezugWpRaw);
+            let haushaltBezug = 0;
+            let wpBezug = 0;
 
-            if (bezugHaushaltRaw < 0) {
-
-                const verbrauchHaushalt = wrEinspeisung - Math.abs(bezugHaushaltRaw);
-                // this.adapter.log.debug('Verbrauch Haushalt: ' + verbrauchHaushalt);
-                this.setStateWithAck(STATES.current.prefix + STATES.current.verbrauchHaushalt, verbrauchHaushalt);
-
-
-                if (bezugWpRaw < 0) {
-                    const verbrauchWp = Math.abs(bezugHaushaltRaw) - Math.abs(bezugWpRaw);
-                    // this.adapter.log.debug('Verbrauch WP: ' + verbrauchWp);
-                    // this.adapter.log.debug('Einspeisung Überschuss: ' + Math.abs(bezugWpRaw));
-
-                    this.setStateWithAck(STATES.current.prefix + STATES.current.verbrauchWp, verbrauchWp);
-                    this.setStateWithAck(STATES.current.prefix + STATES.current.einspeisungUeberschuss, Math.abs(bezugWpRaw));
-
-
+            if (wrCurrent < 0) {
+                if (haushalt < 0 || wp < 0) {
+                    this.adapter.log.warn('wr < 0, haushalt < 0 || wp < 0 should not happen');
+                    return;
                 } else {
-                    const verbrauchWp = Math.abs(bezugHaushaltRaw) + bezugWpRaw;
-                    // this.adapter.log.debug('Verbrauch WP: ' + verbrauchWp);
-                    this.setStateWithAck(STATES.current.prefix + STATES.current.verbrauchWp, verbrauchWp);
-
-
-                    const einspeisung = 0;
-                    // this.adapter.log.debug('Einspeisung Überschuss: ' + einspeisung);
-                    this.setStateWithAck(STATES.current.prefix + STATES.current.einspeisungUeberschuss, einspeisung);
-
-
-                    const bezugNetz = bezugWpRaw;
-                    // this.adapter.log.debug('Bezug Netz: ' + bezugNetz);
-                    this.setStateWithAck(STATES.current.prefix + STATES.current.bezugNetz, bezugNetz);
-
+                    bezug = wp;
+                    haushaltBezug = haushalt;
+                    wpBezug = wp - haushalt;
                 }
             } else {
-                const verbrauchHaushalt = wrEinspeisung + bezugHaushaltRaw;
-                // this.adapter.log.debug('Verbrauch Haushalt: ' + verbrauchHaushalt);
-                this.setStateWithAck(STATES.current.prefix + STATES.current.verbrauchHaushalt, verbrauchHaushalt);
-
-                const verbrauchWp = bezugWpRaw - bezugHaushaltRaw;
-                // this.adapter.log.debug('Verbrauch WP: ' + verbrauchWp);
-                this.setStateWithAck(STATES.current.prefix + STATES.current.verbrauchWp, verbrauchWp);
-
-
-                const einspeisung = 0;
-                // this.adapter.log.debug('Einspeisung Überschuss: ' + einspeisung);
-                this.setStateWithAck(STATES.current.prefix + STATES.current.einspeisungUeberschuss, einspeisung);
-
-
-                const bezugNetz = bezugWpRaw;
-                // this.adapter.log.debug('Bezug Netz: ' + bezugNetz);
-                this.setStateWithAck(STATES.current.prefix + STATES.current.bezugNetz, bezugNetz);
+                if (haushalt < 0) {
+                    if (wp < 0) {
+                        einspeisung = wp;
+                        haushaltBezug = wrCurrent - Math.abs(haushalt);
+                        wpBezug = Math.abs(haushalt) - Math.abs(wp);
+                    } else {
+                        bezug = wp;
+                        haushaltBezug = wrCurrent - Math.abs(haushalt);
+                        wpBezug = Math.abs(haushalt) + wp;
+                    }
+                } else {
+                    if (wp < 0) {
+                        this.adapter.log.warn('wr > 0, haushalt > 0 || wp < 0 should not happen');
+                        return;
+                    } else {
+                        bezug = wp;
+                        haushaltBezug = wrCurrent + haushalt;
+                        wpBezug = wp - haushalt;
+                    }
+                }
             }
+
+            this.setStateWithAck(STATES.current.prefix + STATES.current.wechselrichterEinspeisung, wechselrichterEinspeisung);
+            this.setStateWithAck(STATES.current.prefix + STATES.current.verbrauchHaushalt, haushaltBezug);
+            this.setStateWithAck(STATES.current.prefix + STATES.current.verbrauchWp, wpBezug);
+            this.setStateWithAck(STATES.current.prefix + STATES.current.bezugNetz, bezug);
+            this.setStateWithAck(STATES.current.prefix + STATES.current.einspeisungUeberschuss, einspeisung);
+            this.setStateWithAck(STATES.current.prefix + STATES.current.haushaltBezugRaw, haushaltbezugRaw);
+            this.setStateWithAck(STATES.current.prefix + STATES.current.wpBezugRaw, wpBezugRaw);
         }
     }
 
@@ -212,6 +203,8 @@ export class MetricsCalculator {
         await this.createObject(STATES.current.prefix, STATES.current.verbrauchWp, 'W');
         await this.createObject(STATES.current.prefix, STATES.current.einspeisungUeberschuss, 'W');
         await this.createObject(STATES.current.prefix, STATES.current.bezugNetz, 'W');
+        await this.createObject(STATES.current.prefix, STATES.current.haushaltBezugRaw, 'W');
+        await this.createObject(STATES.current.prefix, STATES.current.wpBezugRaw, 'W');
     }
 
     createObject(prefix: string, state: string, unit: string): Promise<any> {

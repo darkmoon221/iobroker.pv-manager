@@ -46,6 +46,8 @@ class Current {
   constructor() {
     this.prefix = "current.";
     this.wechselrichterEinspeisung = "wechselrichterEinspeisung";
+    this.haushaltBezugRaw = "haushaltBezugRaw";
+    this.wpBezugRaw = "wpBezugRaw";
     this.verbrauchHaushalt = "verbrauchHaushalt";
     this.verbrauchWp = "verbrauchWp";
     this.einspeisungUeberschuss = "einspeisungUeberschuss";

@@ -39,7 +39,7 @@ class MetricsCalculator {
     if (meterData) {
       this.meterData = meterData;
       this.calculateMetrics();
-      this.calculateLiveConsumption();
+      this.calcLive();
     }
   }
   updateWechselrichterCurrent(current) {
@@ -89,38 +89,57 @@ class MetricsCalculator {
       this.setStateWithAck(import_model.STATES.total.prefix + import_model.STATES.total.gesamtEigenverbrauch, eigenbedarfGesamtAnteil);
     }
   }
-  calculateLiveConsumption() {
+  calcLive() {
     if (this.wechselRichterCurrent) {
       const sensorData = this.getSensorData();
-      const wrEinspeisung = parseFloat(this.wechselRichterCurrent);
-      this.setStateWithAck(import_model.STATES.current.prefix + import_model.STATES.current.wechselrichterEinspeisung, wrEinspeisung);
-      const bezugHaushaltRaw = sensorData.strom.aktleist;
-      const bezugWpRaw = sensorData.heizung.aktleist;
-      if (bezugHaushaltRaw < 0) {
-        const verbrauchHaushalt = wrEinspeisung - Math.abs(bezugHaushaltRaw);
-        this.setStateWithAck(import_model.STATES.current.prefix + import_model.STATES.current.verbrauchHaushalt, verbrauchHaushalt);
-        if (bezugWpRaw < 0) {
-          const verbrauchWp = Math.abs(bezugHaushaltRaw) - Math.abs(bezugWpRaw);
-          this.setStateWithAck(import_model.STATES.current.prefix + import_model.STATES.current.verbrauchWp, verbrauchWp);
-          this.setStateWithAck(import_model.STATES.current.prefix + import_model.STATES.current.einspeisungUeberschuss, Math.abs(bezugWpRaw));
+      const wrCurrent = parseFloat(this.wechselRichterCurrent);
+      const haushalt = sensorData.strom.aktleist;
+      const wp = sensorData.heizung.aktleist;
+      const wechselrichterEinspeisung = wrCurrent < 0 ? 0 : wrCurrent;
+      let einspeisung = 0;
+      let bezug = 0;
+      const haushaltbezugRaw = haushalt;
+      const wpBezugRaw = wp;
+      let haushaltBezug = 0;
+      let wpBezug = 0;
+      if (wrCurrent < 0) {
+        if (haushalt < 0 || wp < 0) {
+          this.adapter.log.warn("wr < 0, haushalt < 0 || wp < 0 should not happen");
+          return;
         } else {
-          const verbrauchWp = Math.abs(bezugHaushaltRaw) + bezugWpRaw;
-          this.setStateWithAck(import_model.STATES.current.prefix + import_model.STATES.current.verbrauchWp, verbrauchWp);
-          const einspeisung = 0;
-          this.setStateWithAck(import_model.STATES.current.prefix + import_model.STATES.current.einspeisungUeberschuss, einspeisung);
-          const bezugNetz = bezugWpRaw;
-          this.setStateWithAck(import_model.STATES.current.prefix + import_model.STATES.current.bezugNetz, bezugNetz);
+          bezug = wp;
+          haushaltBezug = haushalt;
+          wpBezug = wp - haushalt;
         }
       } else {
-        const verbrauchHaushalt = wrEinspeisung + bezugHaushaltRaw;
-        this.setStateWithAck(import_model.STATES.current.prefix + import_model.STATES.current.verbrauchHaushalt, verbrauchHaushalt);
-        const verbrauchWp = bezugWpRaw - bezugHaushaltRaw;
-        this.setStateWithAck(import_model.STATES.current.prefix + import_model.STATES.current.verbrauchWp, verbrauchWp);
-        const einspeisung = 0;
-        this.setStateWithAck(import_model.STATES.current.prefix + import_model.STATES.current.einspeisungUeberschuss, einspeisung);
-        const bezugNetz = bezugWpRaw;
-        this.setStateWithAck(import_model.STATES.current.prefix + import_model.STATES.current.bezugNetz, bezugNetz);
+        if (haushalt < 0) {
+          if (wp < 0) {
+            einspeisung = wp;
+            haushaltBezug = wrCurrent - Math.abs(haushalt);
+            wpBezug = Math.abs(haushalt) - Math.abs(wp);
+          } else {
+            bezug = wp;
+            haushaltBezug = wrCurrent - Math.abs(haushalt);
+            wpBezug = Math.abs(haushalt) + wp;
+          }
+        } else {
+          if (wp < 0) {
+            this.adapter.log.warn("wr > 0, haushalt > 0 || wp < 0 should not happen");
+            return;
+          } else {
+            bezug = wp;
+            haushaltBezug = wrCurrent + haushalt;
+            wpBezug = wp - haushalt;
+          }
+        }
       }
+      this.setStateWithAck(import_model.STATES.current.prefix + import_model.STATES.current.wechselrichterEinspeisung, wechselrichterEinspeisung);
+      this.setStateWithAck(import_model.STATES.current.prefix + import_model.STATES.current.verbrauchHaushalt, haushaltBezug);
+      this.setStateWithAck(import_model.STATES.current.prefix + import_model.STATES.current.verbrauchWp, wpBezug);
+      this.setStateWithAck(import_model.STATES.current.prefix + import_model.STATES.current.bezugNetz, bezug);
+      this.setStateWithAck(import_model.STATES.current.prefix + import_model.STATES.current.einspeisungUeberschuss, einspeisung);
+      this.setStateWithAck(import_model.STATES.current.prefix + import_model.STATES.current.haushaltBezugRaw, haushaltbezugRaw);
+      this.setStateWithAck(import_model.STATES.current.prefix + import_model.STATES.current.wpBezugRaw, wpBezugRaw);
     }
   }
   async intitializeStates() {
@@ -142,6 +161,8 @@ class MetricsCalculator {
     await this.createObject(import_model.STATES.current.prefix, import_model.STATES.current.verbrauchWp, "W");
     await this.createObject(import_model.STATES.current.prefix, import_model.STATES.current.einspeisungUeberschuss, "W");
     await this.createObject(import_model.STATES.current.prefix, import_model.STATES.current.bezugNetz, "W");
+    await this.createObject(import_model.STATES.current.prefix, import_model.STATES.current.haushaltBezugRaw, "W");
+    await this.createObject(import_model.STATES.current.prefix, import_model.STATES.current.wpBezugRaw, "W");
   }
   createObject(prefix, state, unit) {
     return this.adapter.setObjectNotExistsAsync(prefix + state, {
