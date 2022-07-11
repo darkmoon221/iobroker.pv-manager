@@ -173,8 +173,8 @@ export class MetricsCalculator {
             }
 
             this.setStateWithAck(STATES.current.prefix + STATES.current.wechselrichterEinspeisung, wechselrichterEinspeisung);
-            this.setStateWithAck(STATES.current.prefix + STATES.current.verbrauchHaushalt, haushaltBezug);
-            this.setStateWithAck(STATES.current.prefix + STATES.current.verbrauchWp, wpBezug);
+            this.setStateWithAck(STATES.current.prefix + STATES.current.verbrauchHaushalt, Math.max(haushaltBezug, 0));
+            this.setStateWithAck(STATES.current.prefix + STATES.current.verbrauchWp, Math.max(wpBezug, 0));
             this.setStateWithAck(STATES.current.prefix + STATES.current.bezugNetz, bezug);
             this.setStateWithAck(STATES.current.prefix + STATES.current.einspeisungUeberschuss, einspeisung);
             this.setStateWithAck(STATES.current.prefix + STATES.current.haushaltBezugRaw, haushaltbezugRaw);

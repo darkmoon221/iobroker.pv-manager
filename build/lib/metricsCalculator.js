@@ -134,8 +134,8 @@ class MetricsCalculator {
         }
       }
       this.setStateWithAck(import_model.STATES.current.prefix + import_model.STATES.current.wechselrichterEinspeisung, wechselrichterEinspeisung);
-      this.setStateWithAck(import_model.STATES.current.prefix + import_model.STATES.current.verbrauchHaushalt, haushaltBezug);
-      this.setStateWithAck(import_model.STATES.current.prefix + import_model.STATES.current.verbrauchWp, wpBezug);
+      this.setStateWithAck(import_model.STATES.current.prefix + import_model.STATES.current.verbrauchHaushalt, Math.max(haushaltBezug, 0));
+      this.setStateWithAck(import_model.STATES.current.prefix + import_model.STATES.current.verbrauchWp, Math.max(wpBezug, 0));
       this.setStateWithAck(import_model.STATES.current.prefix + import_model.STATES.current.bezugNetz, bezug);
       this.setStateWithAck(import_model.STATES.current.prefix + import_model.STATES.current.einspeisungUeberschuss, einspeisung);
       this.setStateWithAck(import_model.STATES.current.prefix + import_model.STATES.current.haushaltBezugRaw, haushaltbezugRaw);
