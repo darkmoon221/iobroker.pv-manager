@@ -66,3 +66,26 @@ export class States {
 }
 
 export const STATES = new States();
+
+export interface TotalValues {
+
+    wechselrichter: number;
+    bezugHaushalt: number;
+    einspeisungHaushalt: number;
+
+    bezugWp: number;
+    einspeisungWp: number;
+
+    eigenbedarfHaushalt: number;
+    eigenbedarfWp: number;
+
+    bezugNetz: number;
+
+    gesamtVerbrauchHaushalt : number;
+    gesamtVerbrauchWp : number;
+
+    anteilEigenbedarfHaushalt: number;
+    anteilEigenbedarfWp: number;
+
+    gesamtEigenverbrauch: number;
+}

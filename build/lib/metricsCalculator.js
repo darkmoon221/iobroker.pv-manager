@@ -87,6 +87,22 @@ class MetricsCalculator {
       this.setStateWithAck(import_model.STATES.total.prefix + import_model.STATES.total.anteilEigenbedarfWp, eigenbedarfWpAnteil);
       const eigenbedarfGesamtAnteil = (eigenbedarfWp + eigenbedarfHaushalt) * 100 / wrKWH;
       this.setStateWithAck(import_model.STATES.total.prefix + import_model.STATES.total.gesamtEigenverbrauch, eigenbedarfGesamtAnteil);
+      const cumulated = {
+        wechselrichter: wrKWH,
+        bezugHaushalt,
+        einspeisungHaushalt,
+        bezugWp: wpBezug,
+        einspeisungWp: wpEinspeisung,
+        eigenbedarfHaushalt,
+        eigenbedarfWp,
+        bezugNetz: bezugNetzWp,
+        gesamtVerbrauchHaushalt,
+        gesamtVerbrauchWp: gesamtVerbrauchWP,
+        anteilEigenbedarfHaushalt: eigenbedarfHaushaltAnteil,
+        anteilEigenbedarfWp: eigenbedarfWpAnteil,
+        gesamtEigenverbrauch: eigenbedarfGesamtAnteil
+      };
+      this.setStateWithAck("cumulated", JSON.stringify(cumulated));
     }
   }
   calcLive() {
@@ -163,6 +179,17 @@ class MetricsCalculator {
     await this.createObject(import_model.STATES.current.prefix, import_model.STATES.current.bezugNetz, "W");
     await this.createObject(import_model.STATES.current.prefix, import_model.STATES.current.haushaltBezugRaw, "W");
     await this.createObject(import_model.STATES.current.prefix, import_model.STATES.current.wpBezugRaw, "W");
+    await this.adapter.setObjectNotExistsAsync("cumulated", {
+      type: "state",
+      common: {
+        name: "cumulated",
+        type: "object",
+        role: "variable",
+        read: true,
+        write: true
+      },
+      native: {}
+    });
   }
   createObject(prefix, state, unit) {
     return this.adapter.setObjectNotExistsAsync(prefix + state, {

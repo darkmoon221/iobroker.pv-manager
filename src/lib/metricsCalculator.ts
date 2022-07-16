@@ -1,5 +1,5 @@
 import {PvManager} from '../main';
-import {SensorData, STATES} from './model';
+import {SensorData, STATES, TotalValues} from './model';
 
 export class MetricsCalculator {
 
@@ -119,6 +119,25 @@ export class MetricsCalculator {
             // this.adapter.log.debug('Eigenbedarf gesamt %: ' + eigenbedarfGesamtAnteil);
             this.setStateWithAck(STATES.total.prefix + STATES.total.gesamtEigenverbrauch, eigenbedarfGesamtAnteil);
 
+
+            const cumulated: TotalValues = {
+                wechselrichter: wrKWH,
+                bezugHaushalt: bezugHaushalt,
+                einspeisungHaushalt: einspeisungHaushalt,
+                bezugWp: wpBezug,
+                einspeisungWp: wpEinspeisung,
+                eigenbedarfHaushalt: eigenbedarfHaushalt,
+                eigenbedarfWp: eigenbedarfWp,
+                bezugNetz: bezugNetzWp,
+                gesamtVerbrauchHaushalt: gesamtVerbrauchHaushalt,
+                gesamtVerbrauchWp: gesamtVerbrauchWP,
+                anteilEigenbedarfHaushalt: eigenbedarfHaushaltAnteil,
+                anteilEigenbedarfWp: eigenbedarfWpAnteil,
+                gesamtEigenverbrauch: eigenbedarfGesamtAnteil
+            };
+
+            this.setStateWithAck('cumulated', JSON.stringify(cumulated));
+
         }
     }
 
@@ -205,6 +224,19 @@ export class MetricsCalculator {
         await this.createObject(STATES.current.prefix, STATES.current.bezugNetz, 'W');
         await this.createObject(STATES.current.prefix, STATES.current.haushaltBezugRaw, 'W');
         await this.createObject(STATES.current.prefix, STATES.current.wpBezugRaw, 'W');
+
+        // await this.createObject('cumulated', 'cumulated');
+        await this.adapter.setObjectNotExistsAsync('cumulated', {
+            type: 'state',
+            common: {
+                name: 'cumulated',
+                type: 'object',
+                role: 'variable',
+                read: true,
+                write: true
+            },
+            native: {},
+        });
     }
 
     createObject(prefix: string, state: string, unit: string): Promise<any> {
