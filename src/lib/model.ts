@@ -69,6 +69,8 @@ export const STATES = new States();
 
 export interface TotalValues {
 
+    time: string;
+
     wechselrichter: number;
     bezugHaushalt: number;
     einspeisungHaushalt: number;

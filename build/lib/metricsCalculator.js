@@ -88,6 +88,7 @@ class MetricsCalculator {
       const eigenbedarfGesamtAnteil = (eigenbedarfWp + eigenbedarfHaushalt) * 100 / wrKWH;
       this.setStateWithAck(import_model.STATES.total.prefix + import_model.STATES.total.gesamtEigenverbrauch, eigenbedarfGesamtAnteil);
       const cumulated = {
+        time: new Date().toISOString(),
         wechselrichter: wrKWH,
         bezugHaushalt,
         einspeisungHaushalt,

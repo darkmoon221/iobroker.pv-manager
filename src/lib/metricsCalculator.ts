@@ -121,6 +121,7 @@ export class MetricsCalculator {
 
 
             const cumulated: TotalValues = {
+                time: new Date().toISOString(),
                 wechselrichter: wrKWH,
                 bezugHaushalt: bezugHaushalt,
                 einspeisungHaushalt: einspeisungHaushalt,
