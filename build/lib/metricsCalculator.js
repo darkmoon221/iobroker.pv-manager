@@ -22,6 +22,7 @@ __export(metricsCalculator_exports, {
 });
 module.exports = __toCommonJS(metricsCalculator_exports);
 var import_model = require("./model");
+var import_stateUtils = require("./stateUtils");
 class MetricsCalculator {
   constructor(pvManager) {
     this.wechselRichterTotal = "";
@@ -37,6 +38,7 @@ class MetricsCalculator {
   }
   updateEnergyMeterData(meterData) {
     if (meterData) {
+      this.adapter.log.debug("Update EnergyMeterData: " + this.meterData);
       this.meterData = meterData;
       this.calculateMetrics();
       this.calcLive();
@@ -61,32 +63,36 @@ class MetricsCalculator {
   calculateMetrics() {
     if (this.wechselRichterTotal) {
       const sensorData = this.getSensorData();
+      this.adapter.log.debug("Wechselrichter Korrekturwert in kWh: " + this.adapter.config.wechselrichterTotalKorrekturWert);
       const wrKWH = parseFloat(this.wechselRichterTotal) / 1e3;
-      this.setStateWithAck(import_model.STATES.total.prefix + import_model.STATES.total.wechselrichter, wrKWH);
+      if (this.adapter.config.wechselrichterTotalKorrekturWert && this.adapter.config.wechselrichterTotalKorrekturWert > 0) {
+        import_stateUtils.StateUtils.setStateWithAck(this.adapter, import_model.STATES.total.prefix + import_model.STATES.total.wechselrichterCorrected, wrKWH - this.adapter.config.wechselrichterTotalKorrekturWert);
+      }
+      import_stateUtils.StateUtils.setStateWithAck(this.adapter, import_model.STATES.total.prefix + import_model.STATES.total.wechselrichter, wrKWH);
       const bezugHaushalt = sensorData.strom.bezug;
-      this.setStateWithAck(import_model.STATES.total.prefix + import_model.STATES.total.bezugHaushalt, bezugHaushalt);
+      import_stateUtils.StateUtils.setStateWithAck(this.adapter, import_model.STATES.total.prefix + import_model.STATES.total.bezugHaushalt, bezugHaushalt);
       const einspeisungHaushalt = sensorData.strom.einspeisung;
-      this.setStateWithAck(import_model.STATES.total.prefix + import_model.STATES.total.einspeisungHaushalt, einspeisungHaushalt);
+      import_stateUtils.StateUtils.setStateWithAck(this.adapter, import_model.STATES.total.prefix + import_model.STATES.total.einspeisungHaushalt, einspeisungHaushalt);
       const wpBezug = sensorData.heizung["1.8.0"];
-      this.setStateWithAck(import_model.STATES.total.prefix + import_model.STATES.total.bezugWp, wpBezug);
+      import_stateUtils.StateUtils.setStateWithAck(this.adapter, import_model.STATES.total.prefix + import_model.STATES.total.bezugWp, wpBezug);
       const wpEinspeisung = sensorData.heizung["2.8.0"];
-      this.setStateWithAck(import_model.STATES.total.prefix + import_model.STATES.total.einspeisungWp, wpEinspeisung);
+      import_stateUtils.StateUtils.setStateWithAck(this.adapter, import_model.STATES.total.prefix + import_model.STATES.total.einspeisungWp, wpEinspeisung);
       const eigenbedarfHaushalt = wrKWH - einspeisungHaushalt;
-      this.setStateWithAck(import_model.STATES.total.prefix + import_model.STATES.total.eigenbedarfHaushalt, eigenbedarfHaushalt);
+      import_stateUtils.StateUtils.setStateWithAck(this.adapter, import_model.STATES.total.prefix + import_model.STATES.total.eigenbedarfHaushalt, eigenbedarfHaushalt);
       const eigenbedarfWp = wrKWH - wpEinspeisung - eigenbedarfHaushalt;
-      this.setStateWithAck(import_model.STATES.total.prefix + import_model.STATES.total.eigenbedarfWp, eigenbedarfWp);
+      import_stateUtils.StateUtils.setStateWithAck(this.adapter, import_model.STATES.total.prefix + import_model.STATES.total.eigenbedarfWp, eigenbedarfWp);
       const bezugNetzWp = this.adapter.config.wpEnergyMeterTotalConsumptionBeforeChange + wpBezug - bezugHaushalt;
-      this.setStateWithAck(import_model.STATES.total.prefix + import_model.STATES.total.bezugNetz, bezugNetzWp);
+      import_stateUtils.StateUtils.setStateWithAck(this.adapter, import_model.STATES.total.prefix + import_model.STATES.total.bezugNetz, bezugNetzWp);
       const gesamtVerbrauchHaushalt = bezugHaushalt + eigenbedarfHaushalt;
-      this.setStateWithAck(import_model.STATES.total.prefix + import_model.STATES.total.gesamtVerbrauchHaushalt, gesamtVerbrauchHaushalt);
+      import_stateUtils.StateUtils.setStateWithAck(this.adapter, import_model.STATES.total.prefix + import_model.STATES.total.gesamtVerbrauchHaushalt, gesamtVerbrauchHaushalt);
       const gesamtVerbrauchWP = bezugNetzWp + eigenbedarfWp;
-      this.setStateWithAck(import_model.STATES.total.prefix + import_model.STATES.total.gesamtVerbrauchWp, gesamtVerbrauchWP);
+      import_stateUtils.StateUtils.setStateWithAck(this.adapter, import_model.STATES.total.prefix + import_model.STATES.total.gesamtVerbrauchWp, gesamtVerbrauchWP);
       const eigenbedarfHaushaltAnteil = eigenbedarfHaushalt * 100 / wrKWH;
-      this.setStateWithAck(import_model.STATES.total.prefix + import_model.STATES.total.anteilEigenbedarfHaushalt, eigenbedarfHaushaltAnteil);
+      import_stateUtils.StateUtils.setStateWithAck(this.adapter, import_model.STATES.total.prefix + import_model.STATES.total.anteilEigenbedarfHaushalt, eigenbedarfHaushaltAnteil);
       const eigenbedarfWpAnteil = eigenbedarfWp * 100 / wrKWH;
-      this.setStateWithAck(import_model.STATES.total.prefix + import_model.STATES.total.anteilEigenbedarfWp, eigenbedarfWpAnteil);
+      import_stateUtils.StateUtils.setStateWithAck(this.adapter, import_model.STATES.total.prefix + import_model.STATES.total.anteilEigenbedarfWp, eigenbedarfWpAnteil);
       const eigenbedarfGesamtAnteil = (eigenbedarfWp + eigenbedarfHaushalt) * 100 / wrKWH;
-      this.setStateWithAck(import_model.STATES.total.prefix + import_model.STATES.total.gesamtEigenverbrauch, eigenbedarfGesamtAnteil);
+      import_stateUtils.StateUtils.setStateWithAck(this.adapter, import_model.STATES.total.prefix + import_model.STATES.total.gesamtEigenverbrauch, eigenbedarfGesamtAnteil);
       const cumulated = {
         time: new Date().toISOString(),
         wechselrichter: wrKWH,
@@ -103,7 +109,7 @@ class MetricsCalculator {
         anteilEigenbedarfWp: eigenbedarfWpAnteil,
         gesamtEigenverbrauch: eigenbedarfGesamtAnteil
       };
-      this.setStateWithAck("cumulated", JSON.stringify(cumulated));
+      import_stateUtils.StateUtils.setStateWithAck(this.adapter, "cumulated", JSON.stringify(cumulated));
     }
   }
   calcLive() {
@@ -150,36 +156,37 @@ class MetricsCalculator {
           }
         }
       }
-      this.setStateWithAck(import_model.STATES.current.prefix + import_model.STATES.current.wechselrichterEinspeisung, wechselrichterEinspeisung);
-      this.setStateWithAck(import_model.STATES.current.prefix + import_model.STATES.current.verbrauchHaushalt, Math.max(haushaltBezug, 0));
-      this.setStateWithAck(import_model.STATES.current.prefix + import_model.STATES.current.verbrauchWp, Math.max(wpBezug, 0));
-      this.setStateWithAck(import_model.STATES.current.prefix + import_model.STATES.current.bezugNetz, bezug);
-      this.setStateWithAck(import_model.STATES.current.prefix + import_model.STATES.current.einspeisungUeberschuss, einspeisung);
-      this.setStateWithAck(import_model.STATES.current.prefix + import_model.STATES.current.haushaltBezugRaw, haushaltbezugRaw);
-      this.setStateWithAck(import_model.STATES.current.prefix + import_model.STATES.current.wpBezugRaw, wpBezugRaw);
+      import_stateUtils.StateUtils.setStateWithAck(this.adapter, import_model.STATES.current.prefix + import_model.STATES.current.wechselrichterEinspeisung, wechselrichterEinspeisung);
+      import_stateUtils.StateUtils.setStateWithAck(this.adapter, import_model.STATES.current.prefix + import_model.STATES.current.verbrauchHaushalt, Math.max(haushaltBezug, 0));
+      import_stateUtils.StateUtils.setStateWithAck(this.adapter, import_model.STATES.current.prefix + import_model.STATES.current.verbrauchWp, Math.max(wpBezug, 0));
+      import_stateUtils.StateUtils.setStateWithAck(this.adapter, import_model.STATES.current.prefix + import_model.STATES.current.bezugNetz, bezug);
+      import_stateUtils.StateUtils.setStateWithAck(this.adapter, import_model.STATES.current.prefix + import_model.STATES.current.einspeisungUeberschuss, einspeisung);
+      import_stateUtils.StateUtils.setStateWithAck(this.adapter, import_model.STATES.current.prefix + import_model.STATES.current.haushaltBezugRaw, haushaltbezugRaw);
+      import_stateUtils.StateUtils.setStateWithAck(this.adapter, import_model.STATES.current.prefix + import_model.STATES.current.wpBezugRaw, wpBezugRaw);
     }
   }
-  async intitializeStates() {
-    await this.createObject(import_model.STATES.total.prefix, import_model.STATES.total.wechselrichter, "kWh");
-    await this.createObject(import_model.STATES.total.prefix, import_model.STATES.total.bezugHaushalt, "kWh");
-    await this.createObject(import_model.STATES.total.prefix, import_model.STATES.total.einspeisungHaushalt, "kWh");
-    await this.createObject(import_model.STATES.total.prefix, import_model.STATES.total.bezugWp, "kWh");
-    await this.createObject(import_model.STATES.total.prefix, import_model.STATES.total.einspeisungWp, "kWh");
-    await this.createObject(import_model.STATES.total.prefix, import_model.STATES.total.eigenbedarfHaushalt, "kWh");
-    await this.createObject(import_model.STATES.total.prefix, import_model.STATES.total.eigenbedarfWp, "kWh");
-    await this.createObject(import_model.STATES.total.prefix, import_model.STATES.total.bezugNetz, "kWh");
-    await this.createObject(import_model.STATES.total.prefix, import_model.STATES.total.gesamtVerbrauchHaushalt, "kWh");
-    await this.createObject(import_model.STATES.total.prefix, import_model.STATES.total.gesamtVerbrauchWp, "kWh");
-    await this.createObject(import_model.STATES.total.prefix, import_model.STATES.total.anteilEigenbedarfHaushalt, "%");
-    await this.createObject(import_model.STATES.total.prefix, import_model.STATES.total.anteilEigenbedarfWp, "%");
-    await this.createObject(import_model.STATES.total.prefix, import_model.STATES.total.gesamtEigenverbrauch, "%");
-    await this.createObject(import_model.STATES.current.prefix, import_model.STATES.current.wechselrichterEinspeisung, "W");
-    await this.createObject(import_model.STATES.current.prefix, import_model.STATES.current.verbrauchHaushalt, "W");
-    await this.createObject(import_model.STATES.current.prefix, import_model.STATES.current.verbrauchWp, "W");
-    await this.createObject(import_model.STATES.current.prefix, import_model.STATES.current.einspeisungUeberschuss, "W");
-    await this.createObject(import_model.STATES.current.prefix, import_model.STATES.current.bezugNetz, "W");
-    await this.createObject(import_model.STATES.current.prefix, import_model.STATES.current.haushaltBezugRaw, "W");
-    await this.createObject(import_model.STATES.current.prefix, import_model.STATES.current.wpBezugRaw, "W");
+  async initializeStates() {
+    await import_stateUtils.StateUtils.createObject(this.adapter, import_model.STATES.total.prefix, import_model.STATES.total.wechselrichterCorrected, "kWh");
+    await import_stateUtils.StateUtils.createObject(this.adapter, import_model.STATES.total.prefix, import_model.STATES.total.wechselrichter, "kWh");
+    await import_stateUtils.StateUtils.createObject(this.adapter, import_model.STATES.total.prefix, import_model.STATES.total.bezugHaushalt, "kWh");
+    await import_stateUtils.StateUtils.createObject(this.adapter, import_model.STATES.total.prefix, import_model.STATES.total.einspeisungHaushalt, "kWh");
+    await import_stateUtils.StateUtils.createObject(this.adapter, import_model.STATES.total.prefix, import_model.STATES.total.bezugWp, "kWh");
+    await import_stateUtils.StateUtils.createObject(this.adapter, import_model.STATES.total.prefix, import_model.STATES.total.einspeisungWp, "kWh");
+    await import_stateUtils.StateUtils.createObject(this.adapter, import_model.STATES.total.prefix, import_model.STATES.total.eigenbedarfHaushalt, "kWh");
+    await import_stateUtils.StateUtils.createObject(this.adapter, import_model.STATES.total.prefix, import_model.STATES.total.eigenbedarfWp, "kWh");
+    await import_stateUtils.StateUtils.createObject(this.adapter, import_model.STATES.total.prefix, import_model.STATES.total.bezugNetz, "kWh");
+    await import_stateUtils.StateUtils.createObject(this.adapter, import_model.STATES.total.prefix, import_model.STATES.total.gesamtVerbrauchHaushalt, "kWh");
+    await import_stateUtils.StateUtils.createObject(this.adapter, import_model.STATES.total.prefix, import_model.STATES.total.gesamtVerbrauchWp, "kWh");
+    await import_stateUtils.StateUtils.createObject(this.adapter, import_model.STATES.total.prefix, import_model.STATES.total.anteilEigenbedarfHaushalt, "%");
+    await import_stateUtils.StateUtils.createObject(this.adapter, import_model.STATES.total.prefix, import_model.STATES.total.anteilEigenbedarfWp, "%");
+    await import_stateUtils.StateUtils.createObject(this.adapter, import_model.STATES.total.prefix, import_model.STATES.total.gesamtEigenverbrauch, "%");
+    await import_stateUtils.StateUtils.createObject(this.adapter, import_model.STATES.current.prefix, import_model.STATES.current.wechselrichterEinspeisung, "W");
+    await import_stateUtils.StateUtils.createObject(this.adapter, import_model.STATES.current.prefix, import_model.STATES.current.verbrauchHaushalt, "W");
+    await import_stateUtils.StateUtils.createObject(this.adapter, import_model.STATES.current.prefix, import_model.STATES.current.verbrauchWp, "W");
+    await import_stateUtils.StateUtils.createObject(this.adapter, import_model.STATES.current.prefix, import_model.STATES.current.einspeisungUeberschuss, "W");
+    await import_stateUtils.StateUtils.createObject(this.adapter, import_model.STATES.current.prefix, import_model.STATES.current.bezugNetz, "W");
+    await import_stateUtils.StateUtils.createObject(this.adapter, import_model.STATES.current.prefix, import_model.STATES.current.haushaltBezugRaw, "W");
+    await import_stateUtils.StateUtils.createObject(this.adapter, import_model.STATES.current.prefix, import_model.STATES.current.wpBezugRaw, "W");
     await this.adapter.setObjectNotExistsAsync("cumulated", {
       type: "state",
       common: {
@@ -191,23 +198,6 @@ class MetricsCalculator {
       },
       native: {}
     });
-  }
-  createObject(prefix, state, unit) {
-    return this.adapter.setObjectNotExistsAsync(prefix + state, {
-      type: "state",
-      common: {
-        name: state,
-        type: "number",
-        role: "variable",
-        read: true,
-        write: true,
-        unit
-      },
-      native: {}
-    });
-  }
-  setStateWithAck(state, value) {
-    this.adapter.setStateAsync(state, { val: value, ack: true });
   }
 }
 // Annotate the CommonJS export names for ESM import in node:

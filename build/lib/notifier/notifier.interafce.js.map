@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../src/lib/notifier/notifier.interafce.ts"],
+  "sourcesContent": ["export interface Notifier {\r\n\r\n    sendNotification(data: string): Promise<void>;\r\n\r\n}\r\n"],
+  "mappings": ";;;;;;;;;;;;;;AAAA;AAAA;",
+  "names": []
+}

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../src/lib/notifier/telegram.notifier.ts"],
+  "sourcesContent": ["import TelegramBot from 'node-telegram-bot-api';\r\nimport {PvManager} from '../../main';\r\nimport {Notifier} from './notifier.interafce';\r\n\r\nexport class TelegramNotifier implements Notifier {\r\n\r\n    adapter: PvManager;\r\n\r\n    bot: TelegramBot;\r\n\r\n    chatId: string;\r\n\r\n    constructor(adapter: PvManager) {\r\n        this.adapter = adapter;\r\n\r\n        this.chatId = this.adapter.config.telegramChatId;\r\n        this.bot = new TelegramBot(this.adapter.config.telegramBotToken, {polling: false});\r\n    }\r\n\r\n    async sendNotification(data: string): Promise<void> {\r\n        this.bot.sendMessage(this.chatId, data).then(() => this.adapter.log.debug('Sent telegram message'));\r\n    }\r\n\r\n}\r\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA,mCAAwB;AAIjB,MAAM,iBAAqC;AAAA,EAQ9C,YAAY,SAAoB;AAC5B,SAAK,UAAU;AAEf,SAAK,SAAS,KAAK,QAAQ,OAAO;AAClC,SAAK,MAAM,IAAI,qCAAY,KAAK,QAAQ,OAAO,kBAAkB,EAAC,SAAS,MAAK,CAAC;AAAA,EACrF;AAAA,EAEA,MAAM,iBAAiB,MAA6B;AAChD,SAAK,IAAI,YAAY,KAAK,QAAQ,IAAI,EAAE,KAAK,MAAM,KAAK,QAAQ,IAAI,MAAM,uBAAuB,CAAC;AAAA,EACtG;AAEJ;",
+  "names": []
+}

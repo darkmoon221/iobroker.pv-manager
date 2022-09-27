@@ -25,7 +25,9 @@ __export(main_exports, {
 });
 module.exports = __toCommonJS(main_exports);
 var utils = __toESM(require("@iobroker/adapter-core"));
+var import_cronJobs = require("./lib/cronJobs");
 var import_metricsCalculator = require("./lib/metricsCalculator");
+var import_telegram = require("./lib/notifier/telegram.notifier");
 class PvManager extends utils.Adapter {
   constructor(options = {}) {
     super({
@@ -42,8 +44,12 @@ class PvManager extends utils.Adapter {
     this.log.debug("Total consumption of wp energy meter before change: " + this.config.wpEnergyMeterTotalConsumptionBeforeChange);
     this.log.debug("Energy meter datapoint: " + this.config.energyMeterDatapoint);
     this.log.debug("Wechselrichter current feed data point: " + this.config.wechselrichterCurrentDataPoint);
+    this.log.debug("Wechselrichter correction value for total value: " + this.config.wechselrichterTotalKorrekturWert);
     this.metricsCalculator = new import_metricsCalculator.MetricsCalculator(this);
-    await this.metricsCalculator.intitializeStates();
+    await this.metricsCalculator.initializeStates();
+    const telegramNotifier = new import_telegram.TelegramNotifier(this);
+    const cronJobs = new import_cronJobs.CronJobs(this, telegramNotifier);
+    await cronJobs.createDailyAtMidnight();
     this.subscribeForeignStates(this.config.wechselrichterTotalDataPoint);
     this.subscribeForeignStates(this.config.energyMeterDatapoint);
     this.subscribeForeignStates(this.config.wechselrichterCurrentDataPoint);

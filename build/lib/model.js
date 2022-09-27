@@ -27,6 +27,7 @@ module.exports = __toCommonJS(model_exports);
 class Total {
   constructor() {
     this.prefix = "total.";
+    this.wechselrichterCorrected = "wechselrichterCorrected";
     this.wechselrichter = "wechselrichter";
     this.bezugHaushalt = "bezugHaushalt";
     this.einspeisungHaushalt = "einspeisungHaushalt";

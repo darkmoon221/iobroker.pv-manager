@@ -5,8 +5,10 @@
 // The adapter-core module gives you access to the core ioBroker functions
 // you need to create an adapter
 import * as utils from '@iobroker/adapter-core';
+import {CronJobs} from './lib/cronJobs';
 // import { threadId } from 'worker_threads';
-import { MetricsCalculator } from './lib/metricsCalculator';
+import {MetricsCalculator} from './lib/metricsCalculator';
+import {TelegramNotifier} from './lib/notifier/telegram.notifier';
 
 // Load your modules here, e.g.:
 // import * as fs from "fs";
@@ -36,15 +38,21 @@ export class PvManager extends utils.Adapter {
         // Reset the connection indicator during startup
         this.setState('info.connection', false, true);
 
-        // The adapters config (in the instance object everything under the attribute "native") is accessible via
+        // The adapter's config (in the instance object everything under the attribute "native") is accessible via
         // this.config:
         this.log.debug('Wechselrichter total feed data point: ' + this.config.wechselrichterTotalDataPoint);
         this.log.debug('Total consumption of wp energy meter before change: ' + this.config.wpEnergyMeterTotalConsumptionBeforeChange);
         this.log.debug('Energy meter datapoint: ' + this.config.energyMeterDatapoint);
         this.log.debug('Wechselrichter current feed data point: ' + this.config.wechselrichterCurrentDataPoint);
+        this.log.debug('Wechselrichter correction value for total value: ' + this.config.wechselrichterTotalKorrekturWert);
 
         this.metricsCalculator = new MetricsCalculator(this);
-        await this.metricsCalculator.intitializeStates();
+        await this.metricsCalculator.initializeStates();
+
+        const telegramNotifier = new TelegramNotifier(this);
+
+        const cronJobs = new CronJobs(this, telegramNotifier);
+        await cronJobs.createDailyAtMidnight();
 
         /*
         For every state in the system there has to be also an object of type state
@@ -135,15 +143,15 @@ export class PvManager extends utils.Adapter {
      */
     private onStateChange(id: string, state: ioBroker.State | null | undefined): void {
 
-        if(id === this.config.wechselrichterTotalDataPoint) {
+        if (id === this.config.wechselrichterTotalDataPoint) {
             this.metricsCalculator?.updateWechselrichterTotal(state?.val?.toString());
         }
 
-        if(id === this.config.energyMeterDatapoint) {
+        if (id === this.config.energyMeterDatapoint) {
             this.metricsCalculator?.updateEnergyMeterData(state?.val?.toString());
         }
 
-        if(id === this.config.wechselrichterCurrentDataPoint) {
+        if (id === this.config.wechselrichterCurrentDataPoint) {
             this.metricsCalculator?.updateWechselrichterCurrent(state?.val?.toString());
         }
 

@@ -8,6 +8,10 @@ declare global {
             wpEnergyMeterTotalConsumptionBeforeChange: number;
             energyMeterDatapoint: string;
             wechselrichterCurrentDataPoint: string;
+            wechselrichterTotalKorrekturWert: number;
+            sendNotifications: boolean;
+            telegramBotToken: string;
+            telegramChatId: string;
         }
     }
 }

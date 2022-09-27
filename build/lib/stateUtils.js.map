@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../src/lib/stateUtils.ts"],
+  "sourcesContent": ["import {PvManager} from '../main';\r\n\r\n\r\nexport class StateUtils {\r\n\r\n    static createObject(adapter: PvManager, prefix: string, state: string, unit?: string): Promise<any> {\r\n        return adapter.setObjectNotExistsAsync(prefix + state, {\r\n            type: 'state',\r\n            common: {\r\n                name: state,\r\n                type: 'number',\r\n                role: 'variable',\r\n                read: true,\r\n                write: true,\r\n                unit: unit\r\n            },\r\n            native: {},\r\n        });\r\n    }\r\n\r\n    static async setStateWithAck(adapter: PvManager, state: string, value: string | number): Promise<void> {\r\n        adapter.setStateAsync(state, {val: value, ack: true}).then(() => adapter.log.debug('State has been set'));\r\n    }\r\n\r\n}\r\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAGO,MAAM,WAAW;AAAA,EAEpB,OAAO,aAAa,SAAoB,QAAgB,OAAe,MAA6B;AAChG,WAAO,QAAQ,wBAAwB,SAAS,OAAO;AAAA,MACnD,MAAM;AAAA,MACN,QAAQ;AAAA,QACJ,MAAM;AAAA,QACN,MAAM;AAAA,QACN,MAAM;AAAA,QACN,MAAM;AAAA,QACN,OAAO;AAAA,QACP;AAAA,MACJ;AAAA,MACA,QAAQ,CAAC;AAAA,IACb,CAAC;AAAA,EACL;AAAA,EAEA,aAAa,gBAAgB,SAAoB,OAAe,OAAuC;AACnG,YAAQ,cAAc,OAAO,EAAC,KAAK,OAAO,KAAK,KAAI,CAAC,EAAE,KAAK,MAAM,QAAQ,IAAI,MAAM,oBAAoB,CAAC;AAAA,EAC5G;AAEJ;",
+  "names": []
+}

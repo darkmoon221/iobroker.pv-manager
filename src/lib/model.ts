@@ -20,6 +20,7 @@ export interface Heizung {
 export class Total {
     prefix = 'total.';
 
+    wechselrichterCorrected = 'wechselrichterCorrected';
     wechselrichter = 'wechselrichter';
     bezugHaushalt = 'bezugHaushalt';
     einspeisungHaushalt = 'einspeisungHaushalt';
@@ -83,8 +84,8 @@ export interface TotalValues {
 
     bezugNetz: number;
 
-    gesamtVerbrauchHaushalt : number;
-    gesamtVerbrauchWp : number;
+    gesamtVerbrauchHaushalt: number;
+    gesamtVerbrauchWp: number;
 
     anteilEigenbedarfHaushalt: number;
     anteilEigenbedarfWp: number;
