@@ -52,7 +52,15 @@ export class CronJobs {
     }
 
     async initializeYesterday(): Promise<string> {
-        const yesterday = new Date(new Date().setDate(new Date().getDate() - 1));
+        const today = new Date();
+        today.setUTCHours(0, 0, 0, 0);
+        this.adapter.log.debug('Today: ' + today);
+
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        yesterday.setUTCHours(0, 0, 0, 0);
+        this.adapter.log.debug('Yesterday: ' + yesterday);
+
 
         const state = this.historyPrefix + yesterday.getFullYear() + '.' + (yesterday.getMonth() + 1) + '.' + yesterday.getDate();
 
