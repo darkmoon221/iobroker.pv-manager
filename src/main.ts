@@ -15,7 +15,7 @@ import {TelegramNotifier} from './lib/notifier/telegram.notifier';
 
 export class PvManager extends utils.Adapter {
 
-    private metricsCalculator: MetricsCalculator | undefined;
+    private metricsCalculator?: MetricsCalculator;
 
     public constructor(options: Partial<utils.AdapterOptions> = {}) {
         super({
@@ -40,11 +40,11 @@ export class PvManager extends utils.Adapter {
 
         // The adapter's config (in the instance object everything under the attribute "native") is accessible via
         // this.config:
-        this.log.debug('Wechselrichter total feed data point: ' + this.config.wechselrichterTotalDataPoint);
-        this.log.debug('Total consumption of wp energy meter before change: ' + this.config.wpEnergyMeterTotalConsumptionBeforeChange);
+        this.log.debug('Inverter total feed data point: ' + this.config.wechselrichterTotalDataPoint);
+        this.log.debug('Total consumption of heatpump energy meter before change: ' + this.config.wpEnergyMeterTotalConsumptionBeforeChange);
         this.log.debug('Energy meter datapoint: ' + this.config.energyMeterDatapoint);
-        this.log.debug('Wechselrichter current feed data point: ' + this.config.wechselrichterCurrentDataPoint);
-        this.log.debug('Wechselrichter correction value for total value: ' + this.config.wechselrichterTotalKorrekturWert);
+        this.log.debug('Inverter current feed data point: ' + this.config.wechselrichterCurrentDataPoint);
+        this.log.debug('Inverter correction value for total value: ' + this.config.wechselrichterTotalKorrekturWert);
 
         this.metricsCalculator = new MetricsCalculator(this);
         await this.metricsCalculator.initializeStates();
@@ -144,7 +144,7 @@ export class PvManager extends utils.Adapter {
     private onStateChange(id: string, state: ioBroker.State | null | undefined): void {
 
         if (id === this.config.wechselrichterTotalDataPoint) {
-            this.metricsCalculator?.updateWechselrichterTotal(state?.val?.toString());
+            this.metricsCalculator?.updateInverterTotal(state?.val?.toString());
         }
 
         if (id === this.config.energyMeterDatapoint) {
@@ -152,7 +152,7 @@ export class PvManager extends utils.Adapter {
         }
 
         if (id === this.config.wechselrichterCurrentDataPoint) {
-            this.metricsCalculator?.updateWechselrichterCurrent(state?.val?.toString());
+            this.metricsCalculator?.updateInverterCurrent(state?.val?.toString());
         }
 
         // if (state) {

@@ -19,7 +19,7 @@ export class StateUtils {
     }
 
     static async setStateWithAck(adapter: PvManager, state: string, value: string | number): Promise<void> {
-        adapter.setStateAsync(state, {val: value, ack: true}).then(() => adapter.log.debug('State has been set'));
+        adapter.setStateAsync(state, {val: value, ack: true}).then((state) => adapter.log.debug('State has been set: ' + state));
     }
 
 }
